@@ -1,14 +1,18 @@
 from __future__ import annotations
 
+import json
 import os
 import re
-from typing import List
-import json
-from typing import Any
-from ollama import chat
+from typing import Any, List
+
 from dotenv import load_dotenv
+from ollama import chat
+from pydantic import BaseModel
 
 load_dotenv()
+
+# --- LLM model configuration ---
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
 
 BULLET_PREFIX_PATTERN = re.compile(r"^\s*([-*•]|\d+\.)\s+")
 KEYWORD_PREFIXES = (
@@ -87,3 +91,40 @@ def _looks_imperative(sentence: str) -> bool:
         "investigate",
     }
     return first.lower() in imperative_starters
+
+
+# --- Exercise 1: LLM-powered extraction via Ollama (AI-generated) ---
+
+class ActionItems(BaseModel):
+    """Pydantic model for structured LLM output."""
+    items: List[str]
+
+
+def extract_action_items_llm(text: str) -> List[str]:
+    """Extract action items from free-form text using an LLM via Ollama.
+
+    Sends the text to a local Ollama model and asks it to return a JSON list
+    of concise, actionable items.  Falls back to an empty list on error.
+    """
+    if not text or not text.strip():
+        return []
+
+    response = chat(
+        model=OLLAMA_MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a helpful assistant that extracts action items from notes. "
+                    "Return ONLY the action items as a JSON object with an 'items' key "
+                    "containing an array of short, actionable strings. "
+                    "If there are no action items, return {\"items\": []}."
+                ),
+            },
+            {"role": "user", "content": text},
+        ],
+        format=ActionItems.model_json_schema(),
+    )
+
+    parsed = ActionItems.model_validate_json(response.message.content)
+    return parsed.items

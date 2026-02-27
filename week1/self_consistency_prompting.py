@@ -8,8 +8,15 @@ load_dotenv()
 
 NUM_RUNS_TIMES = 5
 
-# TODO: Fill this in! Try to get as close to 100% correctness across all runs as possible.
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """You are a careful math problem solver. Solve word problems step by step.
+
+Break down the problem:
+1. Identify all the key numbers and what they represent.
+2. Draw out the situation on a number line if helpful.
+3. Compute the answer step by step.
+4. Double-check your work.
+
+Always provide the final answer on its own line as "Answer: <number>"."""
 
 USER_PROMPT = """
 Solve this problem, then give the final answer on the last line as "Answer: <number>".
@@ -48,7 +55,7 @@ def test_your_prompt(system_prompt: str) -> bool:
     for idx in range(NUM_RUNS_TIMES):
         print(f"Running test {idx + 1} of {NUM_RUNS_TIMES}")
         response = chat(
-            model="llama3.1:8b",
+            model="glm-5:cloud",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": USER_PROMPT},

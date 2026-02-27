@@ -36,8 +36,7 @@ QUESTION = (
 )
 
 
-# TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """You are a Python coding assistant. You write clean, correct Python code based strictly on the provided context documentation. Use only the information given in the context to determine URLs, headers, and response formats. Output only a fenced Python code block."""
 
 
 # For this simple example
@@ -56,7 +55,7 @@ def YOUR_CONTEXT_PROVIDER(corpus: List[str]) -> List[str]:
 
     For example, return [] to simulate missing context, or [corpus[0]] to include the API docs.
     """
-    return []
+    return [corpus[0]]
 
 
 def make_user_prompt(question: str, context_docs: List[str]) -> str:
@@ -97,7 +96,7 @@ def test_your_prompt(system_prompt: str, context_provider: Callable[[List[str]],
     for idx in range(NUM_RUNS_TIMES):
         print(f"Running test {idx + 1} of {NUM_RUNS_TIMES}")
         response = chat(
-            model="llama3.1:8b",
+            model="glm-5:cloud",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},

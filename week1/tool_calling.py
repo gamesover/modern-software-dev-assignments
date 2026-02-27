@@ -69,8 +69,17 @@ TOOL_REGISTRY: Dict[str, Callable[..., str]] = {
 # Prompt scaffolding
 # ==========================
 
-# TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """You have access to the following tool:
+
+Tool name: output_every_func_return_type
+Description: Lists all top-level function return type annotations in a Python file.
+Parameters:
+  - file_path (string, optional): Path to the Python file to analyze. Defaults to the current file if not provided.
+
+When asked to call a tool, respond with ONLY a JSON object in this exact format, no other text:
+{"tool": "output_every_func_return_type", "args": {}}
+
+Do not wrap the JSON in code fences. Do not add any explanation. Output only the raw JSON object."""
 
 
 def resolve_path(p: str) -> str:
@@ -101,7 +110,7 @@ def extract_tool_call(text: str) -> Dict[str, Any]:
 
 def run_model_for_tool_call(system_prompt: str) -> Dict[str, Any]:
     response = chat(
-        model="llama3.1:8b",
+        model="glm-5:cloud",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": "Call the tool now."},

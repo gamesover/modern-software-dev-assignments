@@ -14,8 +14,17 @@ the function is_valid_password(password: str) -> bool. No prose or comments.
 Keep the implementation minimal.
 """
 
-# TODO: Fill this in!
-YOUR_REFLEXION_PROMPT = ""
+YOUR_REFLEXION_PROMPT = """You are a coding assistant that fixes Python code based on test feedback. You will receive the previous code and a list of failing test cases with diagnostics. Analyze the failures, identify what rules are wrong or missing, and output ONLY a corrected fenced Python code block defining is_valid_password(password: str) -> bool.
+
+The password validation rules are:
+- At least 8 characters long
+- At least one lowercase letter
+- At least one uppercase letter
+- At least one digit
+- At least one special character from: !@#$%^&*()-_
+- No whitespace allowed
+
+Output ONLY the corrected code block. No explanation."""
 
 
 # Ground-truth test suite used to evaluate generated code
@@ -81,7 +90,7 @@ def evaluate_function(func: Callable[[str], bool]) -> Tuple[bool, List[str]]:
 
 def generate_initial_function(system_prompt: str) -> str:
     response = chat(
-        model="llama3.1:8b",
+        model="glm-5:cloud",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": "Provide the implementation now."},
@@ -96,7 +105,17 @@ def your_build_reflexion_context(prev_code: str, failures: List[str]) -> str:
 
     Return a string that will be sent as the user content alongside the reflexion system prompt.
     """
-    return ""
+    failure_list = "\n".join(f"- {f}" for f in failures)
+    return f"""Here is my previous implementation:
+
+```python
+{prev_code}
+```
+
+It failed these test cases:
+{failure_list}
+
+Please fix the code so all tests pass. Output only the corrected Python code block."""
 
 
 def apply_reflexion(
@@ -108,7 +127,7 @@ def apply_reflexion(
     reflection_context = build_context(prev_code, failures)
     print(f"REFLECTION CONTEXT: {reflection_context}, {reflexion_prompt}")
     response = chat(
-        model="llama3.1:8b",
+        model="glm-5:cloud",
         messages=[
             {"role": "system", "content": reflexion_prompt},
             {"role": "user", "content": reflection_context},
